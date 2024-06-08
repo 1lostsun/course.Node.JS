@@ -9,5 +9,4 @@ function Test(target: Function) {
 @Test
 export class C {
 
-}
-console.log(123);
+};
