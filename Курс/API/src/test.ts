@@ -10,3 +10,4 @@ function Test(target: Function) {
 export class C {
 
 }
+console.log(123);
