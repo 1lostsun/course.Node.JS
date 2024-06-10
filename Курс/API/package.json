@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node dist/main.js",
+    "lint:fix": "eslint ./src/** --fix",
     "build": "tsc",
     "test": " "
   },
