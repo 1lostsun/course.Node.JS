@@ -18,6 +18,7 @@ export class UserController extends BaseController implements IUserController {
 	}
 
 	login(req: Request, res: Response, next: NextFunction): void {
+		console.log('12');
 		next(new HTTPError(401, 'User is not authorized', 'login'));
 	}
 
