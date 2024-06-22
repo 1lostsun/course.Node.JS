@@ -10,6 +10,7 @@ import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { User } from './user.entity';
 import { UserServise } from './users.service';
+import { ValidateMiddleware } from '../common/validate.middleware';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
@@ -19,13 +20,32 @@ export class UserController extends BaseController implements IUserController {
 	) {
 		super(loggerService);
 		this.bindRoutes([
-			{ path: '/register', method: 'post', func: this.register },
-			{ path: '/login', method: 'post', func: this.login },
+			{
+				path: '/register',
+				method: 'post',
+				func: this.register,
+				middlewares: [new ValidateMiddleware(UserRegisterDto)],
+			},
+			{
+				path: '/login',
+				method: 'post',
+				func: this.login,
+				middlewares: [new ValidateMiddleware(UserLoginDto)],
+			},
 		]);
 	}
 
-	login(req: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): void {
-		next(new HTTPError(401, 'User is not authorized', 'login'));
+	async login(
+		{ body }: Request<{}, {}, UserLoginDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const result = await this.userService.validateUser(body);
+		if (!result) {
+			return next(new HTTPError(401, 'User is not authorized', 'login'));
+		}
+		this.ok(res, {});
+		this.loggerService.log('[loggerService] Успешная авторизация');
 	}
 
 	async register(
@@ -37,6 +57,7 @@ export class UserController extends BaseController implements IUserController {
 		if (!result) {
 			return next(new HTTPError(422, 'Такой пользователь уже существует'));
 		}
-		this.ok(res, result);
+		this.ok(res, { email: result.email, id: result.id });
+		this.loggerService.log('[loggerService] Успешная регистрация');
 	}
 }
